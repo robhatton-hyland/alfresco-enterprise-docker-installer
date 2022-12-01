@@ -30,14 +30,8 @@ module.exports = class extends Generator {
       {
         type: 'input',
         name: 'ram',
-        message: 'How may GB RAM are available for Alfresco (16 is minimum required)?',
+        message: 'How many GB RAM are available for Alfresco (16 is minimum required)?',
         default: '16'
-      },
-      {
-        type: 'confirm',
-        name: 'https',
-        message: 'Do you want to use HTTPs for Web Proxy?',
-        default: false
       },
       {
         type: 'input',
@@ -50,6 +44,12 @@ module.exports = class extends Generator {
         name: 'password',
         message: 'Choose the password for your admin user',
         default: 'admin'
+      },
+      {
+        type: 'confirm',
+        name: 'https',
+        message: 'Do you want to use HTTPs for Web Proxy?',
+        default: false
       },
       {
         when: function (response) {
@@ -88,6 +88,15 @@ module.exports = class extends Generator {
         default: true
       },
       {
+        when: function (response) {
+          return response.acsVersion >= '7.2' || commandProps['acsVersion'] >= '7.2'
+        },
+        type: 'confirm',
+        name: 'elasticsearch',
+        message: 'Do you want to use elasticsearch instead of solr6?',
+        default: false
+      },
+      {
         type: 'confirm',
         name: 'enableContentIndexing',
         message: 'Do you want to search in the content of the documents?',
@@ -95,7 +104,7 @@ module.exports = class extends Generator {
       },
       {
         when: function (response) {
-          return response.acsVersion == '7.1' || commandProps['acsVersion'] == '7.1'
+          return response.acsVersion == '7.1' && response.elasticsearch == false || commandProps['acsVersion'] == '7.1' && response.elasticsearch == false
         },
         type: 'list',
         name: 'solrHttpMode',
@@ -105,7 +114,7 @@ module.exports = class extends Generator {
       },
       {
         when: function (response) {
-          return response.acsVersion >= '7.2' || commandProps['acsVersion'] >= '7.2'
+          return response.acsVersion >= '7.2' && response.elasticsearch == false || commandProps['acsVersion'] >= '7.2' && response.elasticsearch == false
         },
         type: 'list',
         name: 'solrHttpMode',
@@ -169,6 +178,12 @@ module.exports = class extends Generator {
         type: 'confirm',
         name: 'ldap',
         message: 'Do you want to create an internal LDAP server?',
+        default: false
+      },
+      {
+        type: 'confirm',
+        name: 'keycloak',
+        message: 'Do you want to use Alfresco Identity Services?',
         default: false
       },
       {
