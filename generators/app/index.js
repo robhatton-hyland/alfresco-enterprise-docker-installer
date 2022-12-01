@@ -53,7 +53,7 @@ module.exports = class extends Generator {
       },
       {
         when: function (response) {
-          return !response.https == false || !commandProps['https'] == false
+          return response.https == false || !commandProps['https'] == false
         },
         type: 'input',
         name: 'port',
