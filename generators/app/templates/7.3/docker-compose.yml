@@ -76,8 +76,8 @@ services:
                 -Dftp.dataPortTo=2434 <% } %>
                 -Dopencmis.server.override=true
                 -Dopencmis.server.value=http<% if (https == 'true') { %>s<%}%>://${SERVER_NAME}:<%=port%>
-                -DlocalTransform.core-aio.url=http://transform-core-aio:8090/ <% if (transformerocr == 'true') { %>
-                -DlocalTransform.ocr.url=http://transform-ocr:8090/ <% } %>
+                -DlocalTransform.core-aio.url=http://transform-core-aio:8090/
+                -Dtransform.service.url=http://transform-router:8095
                 -Dcsrf.filter.enabled=false
                 -Dalfresco.restApi.basicAuthScheme=true
                 -Dauthentication.protection.enabled=false
@@ -129,6 +129,19 @@ services:
               -Dserver.tomcat.threads.min=4
               -Dlogging.level.org.alfresco.transform.common.TransformerDebug=ERROR
             "
+            
+    transform-router:
+        mem_limit: 512m
+        image: quay.io/alfresco/alfresco-transform-router:${TRANSFORM_ROUTER_TAG}
+        environment:
+          JAVA_OPTS: " -XX:MinRAMPercentage=50 -XX:MaxRAMPercentage=80"
+          ACTIVEMQ_URL: "nio://activemq:61616"
+          CORE_AIO_URL: "http://transform-core-aio:8090"
+          FILE_STORE_URL: "http://shared-file-store:8099/alfresco/api/-default-/private/sfs/versions/1/file"
+     ports:
+       - "8095:8095"
+     links:
+       - activemq
 
     share:
         build:
@@ -151,6 +164,16 @@ services:
         volumes: <% if (windows == 'false') { %>
             - ./logs/share:/usr/local/tomcat/logs <% } %> <% if (windows == 'true') { %>
             - alf-share-logs:/usr/local/tomcat/logs <% } %>
+            
+    digital-workspace:
+        image: quay.io/alfresco/alfresco-digital-workspace:${ADW_TAG}
+        mem_limit: 1g
+        environment:
+          APP_CONFIG_AUTH_TYPE: "BASIC"
+          BASE_PATH: ./
+          APP_BASE_SHARE_URL: "http<% if (https == 'true') { %>s<%}%>://<%=serverName%>:<%=port%>/#/preview/s"
+        depends_on:
+            - alfresco
 
     <% if (db == 'postgres') { %>
     postgres:
@@ -265,19 +288,44 @@ services:
             ACTIVEMQ_ADMIN_LOGIN: "<%=activeMqUser%>"
             ACTIVEMQ_ADMIN_PASSWORD: "<%=activeMqPassword%>" <% } %>
         ports:
-            - 8161:8161
+            - "8161:8161" # Web Console
+            - "5672:5672" # AMQP
+            - "61616:61616" # OpenWire
+            - "61613:61613" # STOMP
         volumes: <% if (windows == 'false') { %>
             - ./data/activemq-data:/opt/activemq/data <% } %> <% if (windows == 'true') { %>
             - activemq-data:/opt/activemq/data <% } %>
     <% } %>
-
-    content-app:
-        image: alfresco/alfresco-content-app:${ACA_TAG}
-        mem_limit: 256m
-        environment:
-            APP_BASE_SHARE_URL: "http://${SERVER_NAME}:<%=port%>/#/preview/s"
-        depends_on:
-            - alfresco
+    
+    <% if (syncservice == 'true') { %>
+    sync-service:
+      image: quay.io/alfresco/service-sync:${SYNC_TAG}
+      mem_limit: 1g
+      environment:
+          JAVA_OPTS: "
+            <% if (db == "postgres") { %>
+            -Dsql.db.driver=org.postgresql.Driver
+            -Dsql.db.url=jdbc:postgresql://postgres:5432/alfresco <% } %> 
+            <% if (db == "mariadb") { %>
+            -Dsql.db.driver==org.mariadb.jdbc.Driver
+            -Ddb.url=jdbc:mysql://mariadb/alfresco?useUnicode=yes\&characterEncoding=UTF-8 <% } %>
+            -Dsql.db.username=alfresco
+            -Dsql.db.password=alfresco
+            -Dmessaging.broker.host=activemq
+            -Drepo.hostname=alfresco
+            -Drepo.port=8080
+            -Ddw.server.applicationConnectors[0].type=http
+            -XX:MinRAMPercentage=50 -XX:MaxRAMPercentage=80
+            -Dcom.sun.management.jmxremote=true
+            -Djava.rmi.server.hostname=0.0.0.0
+            -Dcom.sun.management.jmxremote.port=50800
+            -Dcom.sun.management.jmxremote.rmi.port=50500
+            -Dcom.sun.management.jmxremote.authenticate=false
+            -Dcom.sun.management.jmxremote.ssl=false
+            "
+      ports:
+        - "9090:9090"
+     <% } %>
 
     # HTTP proxy to provide HTTP Default port access to services
     # SOLR API and SOLR Web Console are protected to avoid unauthenticated access
@@ -288,7 +336,7 @@ services:
             - alfresco
             - solr6
             - share
-            - content-app
+            - digital-workspace
         volumes:
             - ./config/nginx.conf:/etc/nginx/nginx.conf
             - ./config/nginx.htpasswd:/etc/nginx/conf.d/nginx.htpasswd <% if (https == 'true') { %>
@@ -329,30 +377,6 @@ services:
             - openldap
         ports:
             - 8088:80
-    <% } %>
-
-    <% if (ocr == 'true') { %>
-    ocrmypdf:
-        build: ./ocrmypdf
-        mem_limit: 512m
-        hostname: ocrmypdf
-        volumes: <% if (windows == 'false') { %>
-            - ./data/ocr/input:/ocr_input
-            - ./data/ocr/output:/ocr_output <% } %> <% if (windows == 'true') { %>
-            - ocr-input:/ocr_input
-            - ocr-output:/ocr_output <% } %>
-    <% } %>
-
-    <% if (transformerocr == 'true') { %>
-    transform-ocr:
-        image: angelborroy/alfresco-tengine-ocr:1.0.0
-        mem_limit: 1536m
-        environment:
-          JAVA_OPTS: "
-              -XX:MinRAMPercentage=50 -XX:MaxRAMPercentage=80
-              -Dserver.tomcat.threads.max=4
-              -Dserver.tomcat.threads.min=1
-            "
     <% } %>
 
 <% if (windows == 'true') { %>
