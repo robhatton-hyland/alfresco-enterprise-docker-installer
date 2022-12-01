@@ -12,5 +12,5 @@
     "generator",
     "yeoman-generator"
   ],
-  "homepage": "https://github.com/aborroy/alfresco-docker-installer"
+  "homepage": "https://github.com/robhatton-hyland/alfresco-enterprise-docker-installer"
 }
