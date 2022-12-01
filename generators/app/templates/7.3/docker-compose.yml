@@ -294,11 +294,9 @@ services:
       image: quay.io/alfresco/service-sync:${SYNC_TAG}
       mem_limit: 1g
       environment:
-          JAVA_OPTS: "
-            <% if (db == 'postgres') { %>
+          JAVA_OPTS: "<% if (db == 'postgres') { %>
             -Dsql.db.driver=org.postgresql.Driver
-            -Dsql.db.url=jdbc:postgresql://postgres:5432/alfresco <% } %> 
-            <% if (db == 'mariadb') { %>
+            -Dsql.db.url=jdbc:postgresql://postgres:5432/alfresco <% } %> <% if (db == 'mariadb') { %>
             -Dsql.db.driver==org.mariadb.jdbc.Driver
             -Ddb.url=jdbc:mysql://mariadb/alfresco?useUnicode=yes\&characterEncoding=UTF-8 <% } %>
             -Dsql.db.username=alfresco
