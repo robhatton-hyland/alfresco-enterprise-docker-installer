@@ -154,6 +154,12 @@ module.exports = class extends Generator {
       },
       {
         type: 'confirm',
+        name: 'syncservice',
+        message: 'Do you want to add the sync service?',
+        default: true
+      },
+      {
+        type: 'confirm',
         name: 'smtp',
         message: 'Do you want to create an internal SMTP server?',
         default: false
@@ -188,16 +194,6 @@ module.exports = class extends Generator {
           {
             name: 'Share Site Creators 0.0.8',
             value: 'share-site-creators',
-            checked: false
-          },
-          {
-            name: 'Simple OCR 2.3.1 (for Alfresco 6.x)',
-            value: 'simple-ocr',
-            checked: false
-          },
-          {
-            name: 'Alfresco OCR Transformer 1.0.0 (for Alfresco 7+)',
-            value: 'alf-tengine-ocr',
             checked: false
           },
           {
@@ -278,10 +274,9 @@ module.exports = class extends Generator {
         db: (this.props.mariadb ? 'mariadb' : 'postgres'),
         smtp: (this.props.smtp ? 'true' : 'false'),
         ldap: (this.props.ldap ? 'true' : 'false'),
+        syncservice: (this.props.syncservice ? 'true' : 'false'),
         crossLocale: (this.props.crossLocale ? 'true' : 'false'),
         disableContentIndexing: (this.props.enableContentIndexing ? 'false' : 'true'),
-        ocr: (this.props.addons.includes('simple-ocr') ? 'true' : 'false'),
-        transformerocr: (this.props.addons.includes('alf-tengine-ocr') ? 'true' : 'false'),
         port: this.props.port,
         https: (this.props.https ? 'true' : 'false'),
         ftp: (this.props.ftp ? 'true' : 'false'),
@@ -400,35 +395,6 @@ module.exports = class extends Generator {
       )
     }
 
-    if (this.props.addons.includes('simple-ocr')) {
-      this.fs.copy(
-        this.templatePath('addons/jars/simple-ocr-repo-*.jar'),
-        this.destinationPath('alfresco/modules/jars')
-      );
-      this.fs.copy(
-        this.templatePath('addons/jars_share/simple-ocr-share-*.jar'),
-        this.destinationPath('share/modules/jars')
-      );
-      this.fs.copy(
-        this.templatePath('addons/ocrmypdf'),
-        this.destinationPath('ocrmypdf')
-      );
-      this.fs.copy(
-        this.templatePath('images/alfresco/bin'),
-        this.destinationPath('alfresco/bin')
-      );
-      this.fs.copy(
-        this.templatePath('images/alfresco/ssh'),
-        this.destinationPath('alfresco/ssh')
-      );
-    }
-
-    if (this.props.addons.includes('alf-tengine-ocr')) {
-      this.fs.copy(
-        this.templatePath('addons/alfresco-tengine-ocr/embed-metadata-action-*.jar'),
-        this.destinationPath('alfresco/modules/jars')
-      )
-    }
 
     if (this.props.addons.includes('esign-cert')) {
       this.fs.copy(
@@ -510,16 +476,6 @@ module.exports = class extends Generator {
       '   ---------------------------------------------------------------\n');
     }
 
-    if (this.props.addons.includes('alf-tengine-ocr')) {
-      this.log('\n   ---------------------------------------------------------------\n' +
-      '   NOTE: You selected to use Alfresco OCR Transformer 1.0.0 (for Alfresco 7+). \n' +
-      '   Default Docker Image (angelborroy/alfresco-tengine-ocr:1.0.0) only includes support for English. \n' +
-      '   You may replace this in docker-compose.yml by "angelborroy/alfresco-tengine-ocr:1.0.0-deu-fra-spa-ita" \n' +
-      '   to provide support for English, German, French, Spanish and Italian. \n' +
-      '   Or you may build your customized Docker Image using https://github.com/aborroy/alf-tengine-ocr/tree/master/ats-transformer-ocr \n' +
-      '   ---------------------------------------------------------------\n');
-    }
-
     if (this.props.addons.includes('share-online-edition')) {
       this.log('\n   ---------------------------------------------------\n' +
       '   WARNING: You selected the addon share-online-edition. \n' +
@@ -565,9 +521,6 @@ function getAvailableMemory(props) {
   }
   if (props.ldap) {
     ram = ram - 256;
-  }
-  if (props.ocr) {
-    ram = ram - 512;
   }
   return ram;
 
