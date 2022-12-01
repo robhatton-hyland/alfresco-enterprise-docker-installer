@@ -120,7 +120,7 @@ services:
             - 2434:2434 <% } %>
 
     transform-core-aio:
-        image: alfresco/alfresco-transform-core-aio:${TRANSFORM_ENGINE_TAG}
+        image: quay.io/alfresco/alfresco-transform-core-aio:${TRANSFORM_ENGINE_TAG}
         mem_limit: 2048m
         environment:
             JAVA_OPTS: "
@@ -259,7 +259,7 @@ services:
 
     <% if (activemq == 'true') { %>
     activemq:
-        image: alfresco/alfresco-activemq:${ACTIVEMQ_TAG}
+        image: quay.io/alfresco/alfresco-activemq:${ACTIVEMQ_TAG}
         mem_limit: 1g<% if (activeMqCredentials == 'true') { %>
         environment:
             ACTIVEMQ_ADMIN_LOGIN: "<%=activeMqUser%>"
