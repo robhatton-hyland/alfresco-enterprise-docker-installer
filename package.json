@@ -1,8 +1,8 @@
 {
-  "name": "generator-alfresco-docker-installer",
+  "name": "generator-alfresco-enterprise-docker-installer",
   "version": "0.6.1",
-  "description": "Alfresco Docker Installer",
-  "homepage": "https://github.com/Alfresco/alfresco-docker-installer",
+  "description": "Alfresco Enterprise Docker Installer",
+  "homepage": "https://github.com/robhatton-hyland/alfresco-enterprise-docker-installer",
   "author": "Angel Borroy <angel.fernandoborroy@hyland.com>",
   "files": [
     "generators"
@@ -69,10 +69,10 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/alfresco/alfresco-docker-installer.git"
+    "url": "git+https://github.com/robhatton-hyland/alfresco-enterprise-docker-installer.git"
   },
   "license": "LGPL-3.0",
   "bugs": {
-    "url": "https://github.com/alfresco/alfresco-docker-installer/issues"
+    "url": "https://github.com/robhatton-hyland/alfresco-enterprise-docker-installer/issues"
   }
 }
