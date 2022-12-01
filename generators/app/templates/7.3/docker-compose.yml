@@ -95,23 +95,14 @@ services:
                 -Dldap.authentication.active=true
                 -Dldap.authentication.java.naming.provider.url=ldap://openldap:389
                 -Dldap.authentication.userNameFormat=uid=%s,dc=keensoft,dc=es
-                -Dldap.synchronization.active=false <% } %> <% if (ocr == "true") { %>
-                -Docr.command=/opt/alfresco/bin/ocrmypdf.sh
-                -Docr.output.verbose=true
-                -Docr.output.file.prefix.command=
-                -Docr.extra.commands="-j1 --author keensoft --rotate-pages -l spa+eng+fra --deskew --clean --skip-text"
-                -Docr.server.os=linux <% } %>
+                -Dldap.synchronization.active=false <% } %>
                 -XX:MinRAMPercentage=50 -XX:MaxRAMPercentage=80
             '
         volumes: <% if (windows == 'false') { %>
             - ./data/alf-repo-data:/usr/local/tomcat/alf_data
-            - ./logs/alfresco:/usr/local/tomcat/logs <% if (ocr == 'true') { %>
-            - ./data/ocr/input:/ocr_input
-            - ./data/ocr/output:/ocr_output <% } %> <% } %> <% if (windows == 'true') { %>
+            - ./logs/alfresco:/usr/local/tomcat/logs <% } %> <% if (windows == 'true') { %>
             - alf-repo-data:/usr/local/tomcat/alf_data
-            - alf-repo-logs:/usr/local/tomcat/logs <% if (ocr == 'true') { %>
-            - alf-repo-ocr-input:/ocr_input
-            - alf-repo-ocr-output:/ocr_output <% } %> <% } %> <% if (solrHttpMode == 'https') { %>
+            - alf-repo-logs:/usr/local/tomcat/logs <% } %> <% if (solrHttpMode == 'https') { %>
             - ./keystores/alfresco:/usr/local/tomcat/keystore <% } %>
         <% if (ftp == 'true') { %>
         ports:
@@ -383,15 +374,11 @@ services:
 volumes:
     alf-repo-data:
     activemq-data:
-    alf-repo-logs: <% if (ocr == 'true') { %>
-    alf-repo-ocr-input:
-    alf-repo-ocr-output: <% } %>
+    alf-repo-logs:
     alf-share-logs: <% if (db == 'postgres') { %>
     postgres-data:
     postgres-logs: <% } %> <% if (db == 'mariadb') { %>
     mariadb-data:
     mariadb-logs: <% } %>
-    solr-data: <% if (ocr == 'true') { %>
-    ocr-input:
-    ocr-output: <% } %>
+    solr-data: 
 <% } %>
