@@ -49,7 +49,7 @@ $ npm install -g yo
 And finally, you can install this generator:
 
 ```bash
-$ npm i https://github.com/robhatton-hyland/alfresco-enterprise-docker-installer
+ npm i https://github.com/robhatton-hyland/alfresco-enterprise-docker-installer
 ```
 
 Deployment is provided for Docker Compose, so following dependencies must be satisfied by the server used to run the generated configuration:
