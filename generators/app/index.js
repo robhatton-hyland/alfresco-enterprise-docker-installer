@@ -48,7 +48,7 @@ module.exports = class extends Generator {
       {
         type: 'confirm',
         name: 'https',
-        message: 'Do you want to use HTTPs for Web Proxy?',
+        message: 'Do you want to use HTTPs (SSL) for Web Proxy?',
         default: false
       },
       {
@@ -124,18 +124,8 @@ module.exports = class extends Generator {
       },
       {
         when: function (response) {
-          return response.acsVersion >= '7.3'  || commandProps['acsVersion'] >= '7.3'
-        },
-        type: 'confirm',
-        name: 'activemq',
-        message: 'Do you want to use the Events service (ActiveMQ)?',
-        default: false
-      },
-      {
-        when: function (response) {
           return (response.activemq == undefined && (response.acsVersion >= '7.1' || commandProps['acsVersion'] >= '7.1')) ||
-                 ((response.acsVersion >= '7.3'  || commandProps['acsVersion'] >= '7.3') &&
-                 (response.activemq  || commandProps['activemq']))
+                 ((response.acsVersion >= '7.3'  || commandProps['acsVersion'] >= '7.3'))
         },
         type: 'confirm',
         name: 'activeMqCredentials',
