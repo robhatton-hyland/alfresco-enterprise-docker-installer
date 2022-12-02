@@ -69,17 +69,25 @@ module.exports = class extends Generator {
         message: 'What HTTPs port do you want to use (all the services are using the same port)?',
         default: '443'
       },
+//      {
+//        type: 'confirm',
+//        name: 'ftp',
+//        message: 'Do you want to use FTP (port 2121)?',
+//        default: false
+//      },
+//      {
+//        type: 'confirm',
+//        name: 'mariadb',
+//        message: 'Do you want to use MariaDB instead of PostgreSQL?',
+//        default: false
+//      },
       {
-        type: 'confirm',
-        name: 'ftp',
-        message: 'Do you want to use FTP (port 2121)?',
-        default: false
-      },
-      {
-        type: 'confirm',
-        name: 'mariadb',
-        message: 'Do you want to use MariaDB instead of PostgreSQL?',
-        default: false
+        type: 'list',
+        name: 'database',
+        message: 'Which database do you want to use?',
+        //choices: [ '6.1', '6.2', '7.0', '7.1', '7.2', '7.3' ],
+        choices: [ 'MySQL', 'MS SQL', 'Oracle', 'MariaDB','PostgreSQL' ],
+        default: 'PostgreSQL'
       },
       {
         type: 'confirm',
@@ -96,12 +104,12 @@ module.exports = class extends Generator {
         message: 'Do you want to use elasticsearch instead of solr6?',
         default: false
       },
-      {
-        type: 'confirm',
-        name: 'enableContentIndexing',
-        message: 'Do you want to search in the content of the documents?',
-        default: true
-      },
+//      {
+//        type: 'confirm',
+//        name: 'enableContentIndexing',
+//        message: 'Do you want to search in the content of the documents?',
+//        default: true
+//      },
       {
         when: function (response) {
           return response.acsVersion == '7.1' && response.elasticsearch == false || commandProps['acsVersion'] == '7.1' && response.elasticsearch == false
@@ -123,40 +131,43 @@ module.exports = class extends Generator {
         default: 'secret'
       },
       {
-        when: function (response) {
-          return (response.activemq == undefined && (response.acsVersion >= '7.1' || commandProps['acsVersion'] >= '7.1')) ||
-                 ((response.acsVersion >= '7.3'  || commandProps['acsVersion'] >= '7.3'))
-        },
-        type: 'confirm',
-        name: 'activeMqCredentials',
-        message: 'Do you want to use credentials for Events service (ActiveMQ)?',
-        default: false
-      },
-      {
-        when: function (response) {
-          return (response.acsVersion >= '7.1' && response.activeMqCredentials) ||
-                 (commandProps['acsVersion'] >= '7.1' && commandProps['activeMqCredentials'])
-        },
-        type: 'input',
-        name: 'activeMqUser',
-        message: 'Choose the USERNAME for your ActiveMQ user',
-        default: 'admin'
-      },
-      {
-        when: function (response) {
-          return (response.acsVersion >= '7.1' && response.activeMqCredentials) ||
-                 (commandProps['acsVersion'] >= '7.1' && commandProps['activeMqCredentials'])
-        },
-        type: 'input',
-        name: 'activeMqPassword',
-        message: 'Choose the PASSWORD for your ActiveMQ user',
-        default: 'password'
-      },
-      {
         type: 'confirm',
         name: 'syncservice',
         message: 'Do you want to add the sync service?',
         default: true
+      },
+      {
+        type: 'confirm',
+        name: 'ats',
+        message: 'Do you want to add the Alfresco Transformation Service?',
+        default: true
+      },
+      {
+        when: function (response) {
+          return response.ats == true
+        },
+        type: 'confirm',
+        name: 'dte',
+        message: 'Do you want to use the Alfresco Document Transformation Engine?',
+        default: true
+      },
+      {
+        when: function (response) {
+          return response.ats == true && response.dte == true
+        },
+        type: 'input',
+        name: 'dtehostname',
+        message: 'What is the hostname of the Alfresco Document Transformation Engine?',
+        default: ''
+      },
+      {
+        when: function (response) {
+          return response.ats == true && response.dte == true
+        },
+        type: 'input',
+        name: 'dteport',
+        message: 'What is the port of the Alfresco Document Transformation Engine?',
+        default: ''
       },
       {
         type: 'confirm',
@@ -176,68 +187,68 @@ module.exports = class extends Generator {
         message: 'Do you want to use Alfresco Identity Services?',
         default: false
       },
-      {
-        type: 'checkbox',
-        name: 'addons',
-        pageSize: 10,
-        message: 'Select the addons to be installed:',
-        choices: [
-          {
-            name: 'Google Docs 3.1.0',
-            value: 'google-docs',
-            checked: false
-          },
-          {
-            name: 'JavaScript Console 0.7',
-            value: 'js-console',
-            checked: false
-          },
-          {
-            name: 'Order of the Bee Support Tools 1.0.0.0',
-            value: 'ootbee-support-tools',
-            checked: false
-          },
-          {
-            name: 'Share Site Creators 0.0.8',
-            value: 'share-site-creators',
-            checked: false
-          },
-          {
-            name: 'ESign Cert 1.8.2',
-            value: 'esign-cert',
-            checked: false
-          },
-          {
-            name: 'Edit with LibreOffice in Alfresco Share 0.3.0',
-            value: 'share-online-edition',
-            checked: false
-          },
-          {
-            name: 'Alfresco PDF Toolkit 1.4.4',
-            value: 'alfresco-pdf-toolkit',
-            checked: false
-          }
-        ]
-      },
+//      {
+//        type: 'checkbox',
+//        name: 'addons',
+//        pageSize: 10,
+//        message: 'Select the addons to be installed:',
+//        choices: [
+//          {
+//            name: 'Google Docs 3.1.0',
+//            value: 'google-docs',
+//            checked: false
+//          },
+//          {
+//            name: 'JavaScript Console 0.7',
+//            value: 'js-console',
+//            checked: false
+//          },
+//          {
+//            name: 'Order of the Bee Support Tools 1.0.0.0',
+//            value: 'ootbee-support-tools',
+//            checked: false
+//          },
+//          {
+//            name: 'Share Site Creators 0.0.8',
+//            value: 'share-site-creators',
+//            checked: false
+//          },
+//          {
+//            name: 'ESign Cert 1.8.2',
+//            value: 'esign-cert',
+//            checked: false
+//          },
+//         {
+//            name: 'Edit with LibreOffice in Alfresco Share 0.3.0',
+//            value: 'share-online-edition',
+//            checked: false
+//          },
+//          {
+//            name: 'Alfresco PDF Toolkit 1.4.4',
+//            value: 'alfresco-pdf-toolkit',
+//            checked: false
+//          }
+//        ]
+//      },
       {
         type: 'confirm',
         name: 'windows',
         message: 'Are you using a Windows host to run Docker?',
         default: false
       },
-      {
-        type: 'confirm',
-        name: 'startscript',
-        message: 'Do you want to use a start script?',
-        default: false
-      },
-      {
-        // Provide volumes permission script for Linux OS
-        type: 'confirm',
-        name: 'volumesscript',
-        message: 'Do you want to get the script to create host volumes?',
-        default: false
-      }
+//      {
+//        type: 'confirm',
+//        name: 'startscript',
+//        message: 'Do you want to use a start script?',
+//        default: false
+//      },
+//      {
+//        // Provide volumes permission script for Linux OS
+//        type: 'confirm',
+//        name: 'volumesscript',
+//        message: 'Do you want to get the script to create host volumes?',
+//        default: false
+//      }
     ];
 
     // Read options from command line parameters
