@@ -143,12 +143,12 @@ module.exports = class extends Generator {
         choices: [ 'Search Services (Solr)', 'Search Enterprise (ElasticSearch)', 'Search and Insight Engine (Solr + Zeppelin)' ],
         default: 'Search Services (Solr)'
       },
-//      {
-//        type: 'confirm',
-//        name: 'enableContentIndexing',
-//        message: 'Do you want to search in the content of the documents?',
-//        default: true
-//      },
+      {
+        type: 'confirm',
+        name: 'enableContentIndexing',
+        message: 'Do you want to enable content indexing?',
+        default: true
+      },
       {
         when: function (response) {
           return response.acsVersion == '7.1' && response.searchservices != 'Search Enterprise (ElasticSearch)' || commandProps['acsVersion'] == '7.1' && commandProps['searchervices'] != 'Search Enterprise (ElasticSearch)'
@@ -261,7 +261,7 @@ module.exports = class extends Generator {
         type: 'confirm',
         name: 'windows',
         message: 'Are you using a Windows host to run Docker?',
-        default: false
+        default: true
       },
 //      {
 //        type: 'confirm',
@@ -315,27 +315,35 @@ module.exports = class extends Generator {
       this.destinationPath('docker-compose.yml'),
       {
         ram: getAvailableMemory(this.props),
-        db: (this.props.mariadb ? 'mariadb' : 'postgres'),
-        smtp: (this.props.smtp ? 'true' : 'false'),
-        ldap: (this.props.ldap ? 'true' : 'false'),
-        syncservice: (this.props.syncservice ? 'true' : 'false'),
-        crossLocale: (this.props.crossLocale ? 'true' : 'false'),
-        disableContentIndexing: (this.props.enableContentIndexing ? 'false' : 'true'),
-        port: this.props.port,
-        https: (this.props.https ? 'true' : 'false'),
-        ftp: (this.props.ftp ? 'true' : 'false'),
-        windows: (this.props.windows ? 'true' : 'false'),
-        googledocs: (this.props.addons.includes('google-docs') ? 'true' : 'false'),
         serverName: this.props.serverName,
+        https: (this.props.https ? 'true' : 'false'),
+        port: this.props.port,
+        ldap: (this.props.ldap ? 'true' : 'false'),
+        keycloak: (this.props.keycloak ? 'true' : 'false'),
+        smtp: (this.props.smtp ? 'true' : 'false'),
+        db: this.props.database,
+        crossLocale: (this.props.crossLocale ? 'true' : 'false'),
+        searchservices: this.props.searchservices,
+        disableContentIndexing: (this.props.enableContentIndexing ? 'false' : 'true'),
         solrHttpMode: this.props.solrHttpMode,
         secureComms: (this.props.solrHttpMode == 'http' ? 'none' : this.props.solrHttpMode),
+        syncservice: (this.props.syncservice ? 'true' : 'false'),
+        ats: (this.props.ats ? 'true' : 'false'),
+        dte: (this.props.dte ? 'true' : 'false'),
+        dtehostname: this.props.dtehostname,
+        dteport: this.props.dteport,
+        googledocs: (this.props.addons.includes('google-docs') ? 'true' : 'false'),
+        windows: (this.props.windows ? 'true' : 'false'),
+        //defaulted values
+        ftp: ('true'),
+        activemq: ('true'),
+        activeMqCredentials: ('true'),
+        activeMqUser: ('activeMqUser'),
+        activeMqPassword: computeHashPassword(tMath.random().toString(36).slice(2)),
+        //activeMqPassword: this.props.activeMqPassword,
         // Generate random password for Repo-SOLR secret communication method
         secretPassword: Math.random().toString(36).slice(2),
-        password: computeHashPassword(this.props.password),
-        activemq: (this.props.activemq ? 'true' : 'false'),
-        activeMqCredentials: (this.props.activeMqCredentials ? 'true' : 'false'),
-        activeMqUser: this.props.activeMqUser,
-        activeMqPassword: this.props.activeMqPassword
+        password: computeHashPassword(this.props.password)
       }
     );
 
@@ -344,8 +352,7 @@ module.exports = class extends Generator {
       this.templatePath('images/alfresco/Dockerfile'),
       this.destinationPath('alfresco/Dockerfile'),
       {
-        ocr: (this.props.addons.includes('simple-ocr') ? 'true' : 'false'),
-        ftp: (this.props.ftp ? 'true' : 'false'),
+        ftp: ('true'),
         acsVersion: this.props.acsVersion
       }
     );
@@ -398,7 +405,7 @@ module.exports = class extends Generator {
     }
 
     // ActiveMQ
-    if (!this.props.activemq) {
+    if (!true) {
       this.fs.copy(
         this.templatePath('addons/jars/activemq-broker-*.jar'),
         this.destinationPath('alfresco/modules/jars')
@@ -406,102 +413,102 @@ module.exports = class extends Generator {
     }
 
     // Addons
-    if (this.props.addons.includes('js-console')) {
-      this.fs.copy(
-        this.templatePath('addons/amps/javascript-console-repo-*.amp'),
-        this.destinationPath('alfresco/modules/amps')
-      );
-      this.fs.copy(
-        this.templatePath('addons/amps_share/javascript-console-share-*.amp'),
-        this.destinationPath('share/modules/amps')
-      )
-    }
-
-    if (this.props.addons.includes('ootbee-support-tools')) {
-      this.fs.copy(
-        this.templatePath('addons/amps/support-tools-repo-*.amp'),
-        this.destinationPath('alfresco/modules/amps')
-      );
-      this.fs.copy(
-        this.templatePath('addons/amps_share/support-tools-share-*.amp'),
-        this.destinationPath('share/modules/amps')
-      )
-    }
-
-    if (this.props.addons.includes('share-site-creators')) {
-      this.fs.copy(
-        this.templatePath('addons/amps/share-site-creators-repo-*.amp'),
-        this.destinationPath('alfresco/modules/amps')
-      );
-      this.fs.copy(
-        this.templatePath('addons/amps_share/share-site-creators-share-*.amp'),
-        this.destinationPath('share/modules/amps')
-      )
-    }
-
-
-    if (this.props.addons.includes('esign-cert')) {
-      this.fs.copy(
-        this.templatePath('addons/amps/esign-cert-repo-*.amp'),
-        this.destinationPath('alfresco/modules/amps')
-      );
-      this.fs.copy(
-        this.templatePath('addons/amps_share/esign-cert-share-*.amp'),
-        this.destinationPath('share/modules/amps')
-      )
-    }
-
-    if (this.props.addons.includes('share-online-edition')) {
-      this.fs.copy(
-        this.templatePath('addons/amps_share/zk-libreoffice-addon-share*.amp'),
-        this.destinationPath('share/modules/amps')
-      )
-    }
-
-    if (this.props.addons.includes('alfresco-pdf-toolkit')) {
-      if (this.props.acsVersion.startsWith('7')) {
-        this.fs.copy(
-          this.templatePath('addons/amps/pdf-toolkit-repo-1.4.4-ACS-7*.amp'),
-          this.destinationPath('alfresco/modules/amps')
-        )
-      } else {
-        this.fs.copy(
-          this.templatePath('addons/amps/pdf-toolkit-repo-1.4.4-SNAPSHOT*.amp'),
-          this.destinationPath('alfresco/modules/amps')
-        )
-      }
-      this.fs.copy(
-        this.templatePath('addons/amps_share/pdf-toolkit-share*.amp'),
-        this.destinationPath('share/modules/amps')
-      )
-    }
-
-    if (this.props.startscript) {
-      this.fs.copyTpl(
-        this.templatePath('scripts/start.sh'),
-        this.destinationPath('start.sh'),
-        {
-          port: this.props.port,
-          serverName: this.props.serverName,
-          https: (this.props.https ? 'true' : 'false')
-        }
-      )
-    }
-
-    if (this.props.volumesscript) {
-      this.fs.copy(
-        this.templatePath('scripts/create_volumes.sh'),
-        this.destinationPath('create_volumes.sh')
-      )
-    }
-
-    if (this.props.addons.includes('share-site-creators')) {
-        this.log('\n   ---------------------------------------------------\n' +
-        '   WARNING: You selected the addon share-site-creators. \n' +
-        '   Remember to add any user to group GROUP_SITE_CREATORS \n' +
-        '   ---------------------------------------------------\n');
-    }
-
+//    if (this.props.addons.includes('js-console')) {
+//      this.fs.copy(
+//        this.templatePath('addons/amps/javascript-console-repo-*.amp'),
+//        this.destinationPath('alfresco/modules/amps')
+//      );
+//      this.fs.copy(
+//        this.templatePath('addons/amps_share/javascript-console-share-*.amp'),
+//        this.destinationPath('share/modules/amps')
+//      )
+//    }
+//
+//    if (this.props.addons.includes('ootbee-support-tools')) {
+//      this.fs.copy(
+//        this.templatePath('addons/amps/support-tools-repo-*.amp'),
+//        this.destinationPath('alfresco/modules/amps')
+//      );
+//      this.fs.copy(
+//        this.templatePath('addons/amps_share/support-tools-share-*.amp'),
+//        this.destinationPath('share/modules/amps')
+//      )
+//    }
+//
+//    if (this.props.addons.includes('share-site-creators')) {
+//      this.fs.copy(
+//        this.templatePath('addons/amps/share-site-creators-repo-*.amp'),
+//        this.destinationPath('alfresco/modules/amps')
+//      );
+//      this.fs.copy(
+//        this.templatePath('addons/amps_share/share-site-creators-share-*.amp'),
+//        this.destinationPath('share/modules/amps')
+//      )
+//    }
+//
+//
+//    if (this.props.addons.includes('esign-cert')) {
+//      this.fs.copy(
+//        this.templatePath('addons/amps/esign-cert-repo-*.amp'),
+//        this.destinationPath('alfresco/modules/amps')
+//      );
+//      this.fs.copy(
+//        this.templatePath('addons/amps_share/esign-cert-share-*.amp'),
+//        this.destinationPath('share/modules/amps')
+//      )
+//    }
+//
+//    if (this.props.addons.includes('share-online-edition')) {
+//      this.fs.copy(
+//        this.templatePath('addons/amps_share/zk-libreoffice-addon-share*.amp'),
+//        this.destinationPath('share/modules/amps')
+//      )
+//    }
+//
+//    if (this.props.addons.includes('alfresco-pdf-toolkit')) {
+//      if (this.props.acsVersion.startsWith('7')) {
+//        this.fs.copy(
+//          this.templatePath('addons/amps/pdf-toolkit-repo-1.4.4-ACS-7*.amp'),
+//          this.destinationPath('alfresco/modules/amps')
+//        )
+//      } else {
+//        this.fs.copy(
+//         this.templatePath('addons/amps/pdf-toolkit-repo-1.4.4-SNAPSHOT*.amp'),
+//          this.destinationPath('alfresco/modules/amps')
+//        )
+//      }
+//      this.fs.copy(
+//        this.templatePath('addons/amps_share/pdf-toolkit-share*.amp'),
+//        this.destinationPath('share/modules/amps')
+//      )
+//    }
+//
+//    if (this.props.startscript) {
+//      this.fs.copyTpl(
+//        this.templatePath('scripts/start.sh'),
+//        this.destinationPath('start.sh'),
+//        {
+//          port: this.props.port,
+//          serverName: this.props.serverName,
+//          https: (this.props.https ? 'true' : 'false')
+//        }
+//      )
+//    }
+//
+//    if (this.props.volumesscript) {
+//      this.fs.copy(
+//        this.templatePath('scripts/create_volumes.sh'),
+//        this.destinationPath('create_volumes.sh')
+//      )
+//    }
+//
+//    if (this.props.addons.includes('share-site-creators')) {
+//        this.log('\n   ---------------------------------------------------\n' +
+//        '   WARNING: You selected the addon share-site-creators. \n' +
+//        '   Remember to add any user to group GROUP_SITE_CREATORS \n' +
+//        '   ---------------------------------------------------\n');
+//    }
+//
     if (this.props.https) {
       this.log('\n   ---------------------------------------------------------------\n' +
       '   WARNING: You selected HTTPs for the NGINX Web Proxy. \n' +
@@ -520,13 +527,13 @@ module.exports = class extends Generator {
       '   ---------------------------------------------------------------\n');
     }
 
-    if (this.props.addons.includes('share-online-edition')) {
-      this.log('\n   ---------------------------------------------------\n' +
-      '   WARNING: You selected the addon share-online-edition. \n' +
-      '   Remember to register required protocol in your client computer. \n' +
-      '   Check https://github.com/zylklab/alfresco-share-online-edition-addon#registering-the-protocols \n' +
-      '   ---------------------------------------------------\n');
-    }
+//    if (this.props.addons.includes('share-online-edition')) {
+//      this.log('\n   ---------------------------------------------------\n' +
+//      '   WARNING: You selected the addon share-online-edition. \n' +
+//      '   Remember to register required protocol in your client computer. \n' +
+//      '   Check https://github.com/zylklab/alfresco-share-online-edition-addon#registering-the-protocols \n' +
+//      '   ---------------------------------------------------\n');
+//    }
 
   }
 
