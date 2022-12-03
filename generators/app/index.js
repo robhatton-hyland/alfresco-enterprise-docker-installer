@@ -30,7 +30,7 @@ module.exports = class extends Generator {
       {
         type: 'input',
         name: 'ram',
-        message: 'How many GB RAM are available for Alfresco (16 is minimum required)?',
+        message: 'How much RAM is available for Alfresco Services in GB (16 is the minimum recommended)?',
         default: '16'
       },
       {
@@ -40,10 +40,10 @@ module.exports = class extends Generator {
         default: 'localhost'
       },
       {
-        type: 'input',
-        name: 'password',
-        message: 'Choose the password for your admin user',
-        default: 'admin'
+//        type: 'input',
+//        name: 'password',
+//        message: 'Choose the password for your admin user',
+//        default: 'admin'
       },
       {
         type: 'confirm',
@@ -69,6 +69,24 @@ module.exports = class extends Generator {
         message: 'What HTTPs port do you want to use (all the services are using the same port)?',
         default: '443'
       },
+      {
+        type: 'confirm',
+        name: 'ldap',
+        message: 'Do you want to create an internal LDAP server?',
+        default: false
+      },
+      {
+        type: 'confirm',
+        name: 'keycloak',
+        message: 'Do you want to use Alfresco Identity Services?',
+        default: false
+      },
+      {
+        type: 'confirm',
+        name: 'smtp',
+        message: 'Do you want to create an internal SMTP server?',
+        default: false
+      },
 //      {
 //        type: 'confirm',
 //        name: 'ftp',
@@ -92,17 +110,38 @@ module.exports = class extends Generator {
       {
         type: 'confirm',
         name: 'crossLocale',
-        message: 'Are you using different languages (this is the most common scenario)?',
+        message: 'Are you using different languages (Cross Locale)?',
         default: true
       },
       {
         when: function (response) {
-          return response.acsVersion >= '7.2' || commandProps['acsVersion'] >= '7.2'
+          return response.acsVersion >= '6.1' && response.acsVersion <= '7.0' || commandProps['acsVersion'] >= '6.1' && commandProps['acsVersion'] <= '7.0'
         },
-        type: 'confirm',
-        name: 'elasticsearch',
-        message: 'Do you want to use elasticsearch instead of solr6?',
-        default: false
+        type: 'list',
+        name: 'searchservices',
+        message: 'Which Search Services do you want to use?',
+        choices: [ 'Search Services (Solr)', 'Search and Insight Engine (Solr + Zeppelin)'],
+        default: 'Search Services (Solr)'
+      },
+      {
+        when: function (response) {
+          return response.acsVersion >= '7.1' && response.database != 'PostgreSQL' || commandProps['acsVersion'] >= '7.1' && commandProps['database'] != 'PostgreSQL'
+        },
+        type: 'list',
+        name: 'searchservices',
+        message: 'Which Search Services do you want to use?',
+        choices: [ 'Search Services (Solr)', 'Search and Insight Engine (Solr + Zeppelin)'],
+        default: 'Search Services (Solr)
+      },
+      {
+        when: function (response) {
+          return response.acsVersion >= '7.1' && response.database == 'PostgreSQL' || commandProps['acsVersion'] >= '7.1' && commandProps['database'] == 'PostgreSQL'
+        },
+        type: 'list',
+        name: 'searchservices',
+        message: 'Which Search Services do you want to use?',
+        choices: [ 'Search Services (Solr)', 'Search Enterprise (ElasticSearch)', 'Search and Insight Engine (Solr + Zeppelin)' ],
+        default: 'Search Services (Solr)'
       },
 //      {
 //        type: 'confirm',
@@ -112,7 +151,7 @@ module.exports = class extends Generator {
 //      },
       {
         when: function (response) {
-          return response.acsVersion == '7.1' && response.elasticsearch == false || commandProps['acsVersion'] == '7.1' && response.elasticsearch == false
+          return response.acsVersion == '7.1' && response.searchservices != 'Search Enterprise (ElasticSearch)' || commandProps['acsVersion'] == '7.1' && commandProps['searchervices'] != 'Search Enterprise (ElasticSearch)'
         },
         type: 'list',
         name: 'solrHttpMode',
@@ -122,7 +161,7 @@ module.exports = class extends Generator {
       },
       {
         when: function (response) {
-          return response.acsVersion >= '7.2' && response.elasticsearch == false || commandProps['acsVersion'] >= '7.2' && response.elasticsearch == false
+          return response.acsVersion >= '7.2' && response.searchservices != 'Search Enterprise (ElasticSearch)'  || commandProps['acsVersion'] >= '7.2' && && commandProps['searchervices'] != 'Search Enterprise (ElasticSearch)'
         },
         type: 'list',
         name: 'solrHttpMode',
@@ -171,20 +210,8 @@ module.exports = class extends Generator {
       },
       {
         type: 'confirm',
-        name: 'smtp',
-        message: 'Do you want to create an internal SMTP server?',
-        default: false
-      },
-      {
-        type: 'confirm',
-        name: 'ldap',
-        message: 'Do you want to create an internal LDAP server?',
-        default: false
-      },
-      {
-        type: 'confirm',
-        name: 'keycloak',
-        message: 'Do you want to use Alfresco Identity Services?',
+        name: 'google-docs',
+        message: 'Do you want to add the Google Docs Integration?',
         default: false
       },
 //      {
