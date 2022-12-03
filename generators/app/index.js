@@ -104,7 +104,7 @@ module.exports = class extends Generator {
         name: 'database',
         message: 'Which database do you want to use?',
         //choices: [ '6.1', '6.2', '7.0', '7.1', '7.2', '7.3' ],
-        choices: [ 'MySQL', 'MS SQL', 'Oracle', 'MariaDB','PostgreSQL' ],
+        choices: [ 'MySQL', 'MSSQL', 'Oracle', 'MariaDB','PostgreSQL' ],
         default: 'PostgreSQL'
       },
       {
