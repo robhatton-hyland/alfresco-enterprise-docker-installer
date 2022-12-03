@@ -14,9 +14,12 @@ services:
             KEYSTORE_TYPE: JCEKS
             KEYSTORE_PASS: keystore <% } %>
         mem_limit: <%=ram/2%>m
-        depends_on: <% if (db == 'postgres') { %>
-            - postgres <% } %> <% if (db == 'mariadb') { %>
-            - mariadb <% } %>
+        depends_on: <% if (db == 'mysql') { %>
+            - mysql= <% } %> <% if (db == 'mssql') { %>
+            - mssql <% } %> <% if (db == 'oracle') { %>
+            - oracle <% } %> <% if (db == 'mariadb') { %>
+            - mariadb <% } %> <% if (db == 'postgres') { %>
+            - postgres <% } %>
         environment:
             JAVA_TOOL_OPTIONS: "
                 -Dencryption.keystore.type=JCEKS
@@ -38,11 +41,18 @@ services:
                 "
             JAVA_OPTS : '
                 -Ddb.username=alfresco
-                -Ddb.password=alfresco<% if (db == "postgres") { %>
-                -Ddb.driver=org.postgresql.Driver
-                -Ddb.url=jdbc:postgresql://postgres:5432/alfresco <% } %> <% if (db == "mariadb") { %>
+                -Ddb.password=alfresco<% if (db == "mysql") { %>
+                -Ddb.driver=org.gjt.mm.mysql.Driver
+                -Ddb.url=jdbc:mysql://mysql/alfresco?useUnicode=yes\&characterEncoding=UTF-8 <% } %> <% if (db == "mssql") { %>
+                -Ddb.driver=com.microsoft.sqlserver.jdbc.SQLServerDriver
+                -Ddb.url=jdbc:sqlserver://sqlserver:1433;databaseName=alfresco;lockTimeout=1000;
+                -Ddb.txn.isolation=4096 <% } %> <% if (db == "oracle") { %>
+                -Ddb.driver=oracle.jdbc.OracleDriver
+                -Ddb.url=jdbc:oracle:thin:@oracle:1521:alfresco <% } %> <% if (db == "mariadb") { %>
                 -Ddb.driver=org.mariadb.jdbc.Driver
-                -Ddb.url=jdbc:mysql://mariadb/alfresco?useUnicode=yes\&characterEncoding=UTF-8 <% } %>
+                -Ddb.url=jdbc:mysql://mariadb/alfresco?useUnicode=yes\&characterEncoding=UTF-8 <% } %> <% if (db == "postgres") { %>
+                -Ddb.driver=org.postgresql.Driver
+                -Ddb.url=jdbc:postgresql://postgres:5432/alfresco <% } %> 
                 -Dalfresco_user_store.adminpassword=<%=password%>
                 -Dsystem.preferred.password.encoding=bcrypt10
                 -Dsolr.host=solr6
@@ -167,28 +177,45 @@ services:
         depends_on:
             - alfresco
 
-    <% if (db == 'postgres') { %>
-    postgres:
-        image: postgres:${POSTGRES_TAG}
+    <% if (db == 'mysql') { %>
+    mysql:
+        image: mysql:${MYSQL_TAG}
         mem_limit: <%=ram/8%>m
         environment:
-            - POSTGRES_PASSWORD=alfresco
-            - POSTGRES_USER=alfresco
-            - POSTGRES_DB=alfresco
+            - MYSQL_ROOT_PASSWORD=alfresco
+            - MYSQL_DATABASE=alfresco
+            - MYSQL_USER=alfresco
+            - MYSQL_PASSWORD=alfresco
         command: "
-            postgres
-              -c max_connections=200
-              -c logging_collector=on
-              -c log_min_messages=LOG
-              -c log_directory=/var/log/postgresql"
-        ports:
-            - 5432:5432
+            --character-set-server=utf8
+            --collation-server=utf8_bin
+            --lower_case_table_names=1
+            --max_connections=200
+            --innodb-flush-method=O_DIRECT
+            --wait_timeout=28800"
         volumes: <% if (windows == 'false') { %>
-            - ./data/postgres-data:/var/lib/postgresql/data
-            - ./logs/postgres:/var/log/postgresql <% } %> <% if (windows == 'true') { %>
-            - postgres-data:/var/lib/postgresql/data
-            - postgres-logs:/var/log/postgresql <% } %>
-    <% } %> <% if (db == 'mariadb') { %>
+            - ./data/mysql_data:/var/lib/mysql
+            - ./logs/mysql:/var/log/mysql <% } %> <% if (windows == 'true') { %>
+            - mysql-data:/var/lib/mysql
+            - mysqllogs:/var/log/mysql <% } %>
+        ports:
+            - 3306:3306
+    <% } %> <% if (db == 'mssql') { %>
+    mssql:
+        image: mcr.microsoft.com/mssql/server:${MSSQL_TAG}
+        mem_limit: <%=ram/8%>m
+        environment:
+            - MSSQL_SA_PASSWORD=alfresco
+            - MSSQL_PID=Developer
+            - ACCEPT_EULA=Y
+#        volumes: <% if (windows == 'false') { %>
+#            - ./data/mysql_data:/var/lib/mysql
+#            - ./logs/mysql:/var/log/mysql <% } %> <% if (windows == 'true') { %>
+#            - mysql-data:/var/lib/mysql
+#            - mysqllogs:/var/log/mysql <% } %>
+        ports:
+            - 1433:1433
+    <% } %><% if (db == 'mariadb') { %>
     mariadb:
         image: mariadb:${MARIADB_TAG}
         mem_limit: <%=ram/8%>m
@@ -211,6 +238,27 @@ services:
             - mariadb-logs:/var/log/mysql <% } %>
         ports:
             - 3306:3306
+    <% } %> <% if (db == 'postgres') { %>
+    postgres:
+        image: postgres:${POSTGRES_TAG}
+        mem_limit: <%=ram/8%>m
+        environment:
+            - POSTGRES_PASSWORD=alfresco
+            - POSTGRES_USER=alfresco
+            - POSTGRES_DB=alfresco
+        command: "
+            postgres
+              -c max_connections=200
+              -c logging_collector=on
+              -c log_min_messages=LOG
+              -c log_directory=/var/log/postgresql"
+        ports:
+            - 5432:5432
+        volumes: <% if (windows == 'false') { %>
+            - ./data/postgres-data:/var/lib/postgresql/data
+            - ./logs/postgres:/var/log/postgresql <% } %> <% if (windows == 'true') { %>
+            - postgres-data:/var/lib/postgresql/data
+            - postgres-logs:/var/log/postgresql <% } %>
     <% } %>
 
     solr6:
@@ -367,6 +415,17 @@ services:
             - openldap
         ports:
             - 8088:80
+    <% } %>
+    
+    <% if (keycloak == 'true') { %>
+    identity-service:
+        image: quay.io/alfresco/alfresco-identity-service::${ALFRESCO_IDS_TAG}
+        environment:
+          KEYCLOAK_USER: admin
+          EYCLOAK_PASSWORD: admin
+          DB_VENDOR: H2
+        ports:
+          - 8999:8080
     <% } %>
 
 <% if (windows == 'true') { %>
