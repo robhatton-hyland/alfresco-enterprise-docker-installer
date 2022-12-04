@@ -1,24 +1,26 @@
-# generator-alfresco-docker-installer
-> Alfresco Docker Installer
+# alfresco-enterprise-docker-installer
+> Alfresco Enterprise Docker Installer
 
 ## DISCLAIMER
-**IMPORTANT** This project is not supported by Alfresco in any way. Despite deployments using Docker Compose are considered a valid approach for ACS deployment (Community and Enterprise), this `alfresco-docker-installer` tool is **not** the official Alfresco recommendation. Please, check [https://github.com/Alfresco/acs-deployment/tree/master/docker-compose](https://github.com/Alfresco/acs-deployment/tree/master/docker-compose) in order to understand official recommendations from Alfresco.
+**IMPORTANT** This project is not supported or owned by Alfresco in any way. Despite deployments using Docker Compose are considered a valid approach for ACS deployment (Community and Enterprise), this `alfresco-enterprise-docker-installer` tool is **not** the official Alfresco recommendation. Please, check [https://github.com/Alfresco/acs-deployment/tree/master/docker-compose](https://github.com/Alfresco/acs-deployment/tree/master/docker-compose) in order to understand official recommendations from Alfresco.
 
 ## Description
 
-Since Alfresco Installer was discontinued from Alfresco 5.2, this project provides a command line installer for Alfresco Community 6.1, 6.2, 7.0, 7.1, 7.2 and 7.3 to be used in Docker Compose installations.
+This project is based on the alfresco-docker-installer (https://github.com/Alfresco/alfresco-docker-installer) which serves as a method of generating a docker-compose.yml for the Community version for Alfresco Content Services. This project instead focuses exclusively on the Enterprise version of Alfresco Content Services for the intended use by Alfresco Technical Support staff only.
 
 This project generates a Docker Compose template ready to be used including following features:
 
 * RAM limits for every service according to global memory available for Docker
-* PostgreSQL or MariaDB as database (no other option but MySQL is supported for Community)
-* Search Services configured for environments using several languages for contents or from operative systems / browsers
+* Choice of supported databases (MySQL, MSSQL, Oracle, Postgres, MariaDB)
+* SSL (HTTPs)
+* Alfresco Transformation Services with option of also using the Document Transformation Services (outside of docker)
+* Choice of supported variants of Search Services (Search Services, Enterprise Search Services, Search and Insight Engine)
 * Outbound Email service (smtp)
 * LDAP service for identification (based in OpenLDAP)
-* Several Community addons available
-* Wrapper Script for waiting the alfresco boot to finish
+* Alfresco Identity Services (keycloak)
 
->> This generator creates a base Docker Template with the configuration selected, but you should review volumes, configuration, modules & tuning parameters before using this composition in Production environments.
+
+>> This generator creates a base Docker Template with the configuration selected, but you should review volumes, configuration, modules & tuning parameters.
 
 **WARNING** Depending on the OS used for hosting Docker, some adjustments must be made in default **volumes** configuration:
 * For *Mac OS*, produced Docker Compose template should work as is
@@ -29,12 +31,12 @@ This project generates a Docker Compose template ready to be used including foll
 
 This program has following dependencies:
 
-* Node.js
+* Node.js (known working version - https://nodejs.org/download/release/v16.18.1/)
 * Yeoman
 
 You can download and install `Node.js` from official web page:
 
-https://nodejs.org/en/download/
+https://nodejs.org/en/download/ (known working version - https://nodejs.org/download/release/v16.18.1/)
 
 Or you can use any of the package managers provided by the product:
 
@@ -43,13 +45,13 @@ https://nodejs.org/en/download/package-manager/
 Once Node.js is installed, you can install [Yeoman](http://yeoman.io) as a module:
 
 ```bash
-$ npm install -g yo
+npm install -g yo
 ```
 
 And finally, you can install this generator:
 
 ```bash
- npm i https://github.com/robhatton-hyland/alfresco-enterprise-docker-installer
+npm i https://github.com/robhatton-hyland/alfresco-enterprise-docker-installer
 ```
 
 Deployment is provided for Docker Compose, so following dependencies must be satisfied by the server used to run the generated configuration:
@@ -73,10 +75,10 @@ Create a folder where Docker Compose template files are going to be produced and
 >>> If you downloaded this project, **don't** reuse source code folder. Create an empty folder to generate Docker Compose template anywhere.
 
 ```
-$ mkdir docker-compose
-$ cd docker-compose
+mkdir docker-compose
+cd docker-compose
 
-$ yo alfresco-docker-installer
+yo alfresco-enterprise-docker-installer
 ```
 
 Several options are provided in order to build the configuration.
@@ -218,7 +220,7 @@ When using Linux as host, you can get the script `create_volumes.sh` in Docker C
 Default values for options can be specified in the command line, using a `--name=value` pattern. When an options is specified in the command line, the question is not prompted to the user, so you can generate a Docker Compose template with no user interaction.
 
 ```
-$ yo alfresco-docker-installer --acsVersion=6.1
+$ yo alfresco-enterprise-docker-installer --acsVersion=6.1
 ```
 
 **Parameter names reference**
