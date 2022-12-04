@@ -76,8 +76,12 @@ Create a folder where Docker Compose template files are going to be produced and
 
 ```
 mkdir docker-compose
+```
+```
 cd docker-compose
+```
 
+```
 yo alfresco-enterprise-docker-installer
 ```
 
