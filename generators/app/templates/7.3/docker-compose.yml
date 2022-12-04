@@ -48,7 +48,8 @@ services:
                 -Ddb.url=jdbc:sqlserver://sqlserver:1433;databaseName=alfresco;lockTimeout=1000;
                 -Ddb.txn.isolation=4096 <% } %> <% if (db == "oracle") { %>
                 -Ddb.driver=oracle.jdbc.OracleDriver
-                -Ddb.url=jdbc:oracle:thin:@oracle:1521:alfresco <% } %> <% if (db == "mariadb") { %>
+                -Ddb.url=jdbc:oracle:thin:@oracle:1521:alfresco
+                -Ddb.pool.max=275 <% } %> <% if (db == "mariadb") { %>
                 -Ddb.driver=org.mariadb.jdbc.Driver
                 -Ddb.url=jdbc:mysql://mariadb/alfresco?useUnicode=yes\&characterEncoding=UTF-8 <% } %> <% if (db == "postgres") { %>
                 -Ddb.driver=org.postgresql.Driver
@@ -215,7 +216,19 @@ services:
 #            - mysqllogs:/var/log/mysql <% } %>
         ports:
             - 1433:1433
-    <% } %><% if (db == 'mariadb') { %>
+    <% } %> <% if (db == 'oracle') { %>
+    oracle:
+        image: ${ORACLE_TAG}
+        mem_limit: <%=ram/8%>m
+#        environment:
+#        volumes: <% if (windows == 'false') { %>
+#            - ./data/mysql_data:/var/lib/mysql
+#            - ./logs/mysql:/var/log/mysql <% } %> <% if (windows == 'true') { %>
+#            - mysql-data:/var/lib/mysql
+#            - mysqllogs:/var/log/mysql <% } %>
+        ports:
+            - 1521:1521
+    <% } %> <% if (db == 'mariadb') { %>
     mariadb:
         image: mariadb:${MARIADB_TAG}
         mem_limit: <%=ram/8%>m
