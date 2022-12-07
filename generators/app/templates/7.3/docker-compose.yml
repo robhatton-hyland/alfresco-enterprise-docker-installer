@@ -86,9 +86,10 @@ services:
                 -Dftp.dataPortFrom=2433
                 -Dftp.dataPortTo=2434 <% } %>
                 -Dopencmis.server.override=true
-                -Dopencmis.server.value=http<% if (https == 'true') { %>s<%}%>://${SERVER_NAME}:<%=port%>
+                -Dopencmis.server.value=http<% if (https == 'true') { %>s<%}%>://${SERVER_NAME}:<%=port%><% if (ats == 'true') { %>
                 -DlocalTransform.core-aio.url=http://transform-core-aio:8090/
-                -Dtransform.service.url=http://transform-router:8095
+                -Dtransform.service.url=http://transform-router:8095<%}%> <% if (dte == 'true') { %>
+                -DlocalTransform.transform-dte.url=http://transform-dte-engine:8090/<%}%>
                 -Dcsrf.filter.enabled=false
                 -Dalfresco.restApi.basicAuthScheme=true
                 -Dauthentication.protection.enabled=false
@@ -121,8 +122,9 @@ services:
             - 2433:2433
             - 2434:2434 <% } %>
 
+    <% if (ats == 'true') { %>
     transform-core-aio:
-        image: quay.io/alfresco/alfresco-transform-core-aio:${TRANSFORM_ENGINE_TAG}
+        image: quay.io/alfresco/alfresco-transform-core-aio:${TRANSFORM_CORE_AIO_TAG}
         mem_limit: 2048m
         environment:
             JAVA_OPTS: "
@@ -145,7 +147,38 @@ services:
         <% if (activemq == 'true') { %>
         links:
           - activemq <% } %>
+    <% } %>
 
+    <% if (ats == 'true' || dte == 'true') { %>
+    shared-file-store:
+        image: quay.io/alfresco/alfresco-shared-file-store:{SHARED_FILE_STORE_TAG}
+          mem_limit: 512m
+          environment:
+            JAVA_OPTS: " -XX:MinRAMPercentage=50 -XX:MaxRAMPercentage=80"
+            scheduler.content.age.millis: 86400000
+            scheduler.cleanup.interval: 86400000
+        ports:
+          - "8099:8099"
+        volumes:
+          - shared-file-store-volume:/tmp/Alfresco/sfs
+    <% } %>
+    
+    <% if (dte == 'true') { %>
+    transform-dte-engine:
+        image: quay.io/alfresco/transform-dte-engine:{TRANSFORM_DTE_TAG}
+        mem_limit: 2g
+        environment:
+          JAVA_OPTS: " -Xms256m -Xmx512m -DdteServerUrl=<%=dteprotocol%>://<%=dtehostname%>:<%=dteport%>/transformation-backend"
+          ACTIVEMQ_URL: "nio://activemq:61616"
+          ACTIVEMQ_USER: "admin"
+          ACTIVEMQ_PASSWORD: "admin"
+          FILE_STORE_URL: "http://shared-file-store:8099/alfresco/api/-default-/private/sfs/versions/1/file"
+     ports:
+         - 8091:8090
+     links:
+         - activemq
+    <% } %>
+    
     share:
         build:
           context: ./share
