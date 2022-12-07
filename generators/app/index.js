@@ -183,7 +183,7 @@ module.exports = class extends Generator {
       },
       {
         when: function (response) {
-          return response.ats == true
+          return response.ats == false
         },
         type: 'confirm',
         name: 'dte',
@@ -192,7 +192,7 @@ module.exports = class extends Generator {
       },
       {
         when: function (response) {
-          return response.ats == true && response.dte == true
+          return response.dte == true
         },
         type: 'input',
         name: 'dtehostname',
@@ -201,7 +201,7 @@ module.exports = class extends Generator {
       },
       {
         when: function (response) {
-          return response.ats == true && response.dte == true
+          return response.dte == true
         },
         type: 'input',
         name: 'dteport',
