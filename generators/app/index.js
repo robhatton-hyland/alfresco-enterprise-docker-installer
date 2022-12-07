@@ -194,6 +194,16 @@ module.exports = class extends Generator {
         when: function (response) {
           return response.dte == true
         },
+        type: 'list',
+        name: 'dteprotocol',
+        message: 'How will you connect to DTE?',
+        choices: [ 'http', 'https' ],
+        default: 'http'
+      },
+      {
+        when: function (response) {
+          return response.dte == true
+        },
         type: 'input',
         name: 'dtehostname',
         message: 'What is the hostname of the Alfresco Document Transformation Engine?',
@@ -330,6 +340,7 @@ module.exports = class extends Generator {
         syncservice: (this.props.syncservice ? 'true' : 'false'),
         ats: (this.props.ats ? 'true' : 'false'),
         dte: (this.props.dte ? 'true' : 'false'),
+        dteprotocol: this.props.dteprotocol,
         dtehostname: this.props.dtehostname,
         dteport: this.props.dteport,
         googledocs: (this.props.addons.includes('google-docs') ? 'true' : 'false'),
