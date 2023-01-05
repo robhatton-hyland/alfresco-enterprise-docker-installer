@@ -1,5 +1,5 @@
 {
-  "name": "alfresco-enterprise-docker-installer",
+  "name": "generator-alfresco-enterprise-docker-installer",
   "description": "Alfresco Enterprise Docker Installer",
   "main": "generators/index.js",
   "authors": [
