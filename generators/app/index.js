@@ -39,12 +39,12 @@ module.exports = class extends Generator {
         message: 'What is the name of your server?',
         default: 'localhost'
       },
-      {
+//      {
 //        type: 'input',
 //        name: 'password',
 //        message: 'Choose the password for your admin user',
 //        default: 'admin'
-      },
+//      },
       {
         type: 'confirm',
         name: 'https',
@@ -131,7 +131,7 @@ module.exports = class extends Generator {
         name: 'searchservices',
         message: 'Which Search Services do you want to use?',
         choices: [ 'Search Services (Solr)', 'Search and Insight Engine (Solr + Zeppelin)'],
-        default: 'Search Services (Solr)
+        default: 'Search Services (Solr)'
       },
       {
         when: function (response) {
@@ -161,7 +161,7 @@ module.exports = class extends Generator {
       },
       {
         when: function (response) {
-          return response.acsVersion >= '7.2' && response.searchservices != 'Search Enterprise (ElasticSearch)'  || commandProps['acsVersion'] >= '7.2' && && commandProps['searchervices'] != 'Search Enterprise (ElasticSearch)'
+          return response.acsVersion >= '7.2' && response.searchservices != 'Search Enterprise (ElasticSearch)'  || commandProps['acsVersion'] >= '7.2' && commandProps['searchervices'] != 'Search Enterprise (ElasticSearch)'
         },
         type: 'list',
         name: 'solrHttpMode',
