@@ -1,5 +1,5 @@
 {
-  "name": "generator-alfresco-enterprise-docker-installer",
+  "name": "alfresco-enterprise-docker-installer",
   "version": "0.6.1",
   "description": "Alfresco Enterprise Docker Installer",
   "homepage": "https://github.com/robhatton-hyland/alfresco-enterprise-docker-installer",
